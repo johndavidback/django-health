@@ -57,7 +57,10 @@ class DBHealthView(View):
                 except OperationalError:
                     return HttpResponseServerError()
             else:
-                c.execute('SELECT 1')
-                result = c.fetchone()
+                try:
+                    c.execute('SELECT 1')
+                    result = c.fetchone()
+                except Exception:
+                    return HttpResponseServerError()
 
             return HttpResponse(result, status=200)
