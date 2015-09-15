@@ -52,12 +52,12 @@ class DBHealthView(View):
             if connection.vendor == 'postgresql':
                 from psycopg2 import OperationalError
                 try:
-                    c.execute('SELECT id FROM auth_user LIMIT 1')
+                    c.execute('SELECT 1')
                     result = c.fetchone()
                 except OperationalError:
                     return HttpResponseServerError()
             else:
-                c.execute('SELECT id FROM auth_user LIMIT 1')
+                c.execute('SELECT 1')
                 result = c.fetchone()
 
             return HttpResponse(result, status=200)
