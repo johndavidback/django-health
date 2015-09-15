@@ -1,7 +1,10 @@
 from django.views.generic import View
-from django.http import HttpResponse, HttpResponseNotFound, HttpResponseServerError
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseServerError, HttpResponseBadRequest
 from django.core.cache import cache
 from django.db import connection
+from django.conf import settings
+
+from . import defaults
 
 import string
 import random
@@ -17,6 +20,10 @@ class HealthView(View):
 class CacheHealthView(View):
 
     def get(self, request, *args, **kwargs):
+
+        if not getattr(settings, 'HEALTH_CHECK_CACHE', defaults.HEALTH_DEFAULTS.get('CHECK_CACHE')):
+            # We don't want to check this.  Return 400.
+            return HttpResponseBadRequest()
 
         # Create a random cache key to avoid collision
         cache_key = ''.join(random.choice(string.ascii_letters) for _ in range(100))
@@ -35,6 +42,10 @@ class CacheHealthView(View):
 class DBHealthView(View):
 
     def get(self, request, *args, **kwargs):
+
+        if not getattr(settings, 'HEALTH_CHECK_DB', defaults.HEALTH_DEFAULTS.get('CHECK_DB')):
+            # We don't want to check the DB. Return 400.
+            return HttpResponseBadRequest()
 
         with connection.cursor() as c:
 

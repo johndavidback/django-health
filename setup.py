@@ -8,7 +8,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='django-health',
-    version='0.2b',
+    version='0.3',
     packages=['health'],
     include_package_data=True,
     license='BSD License',
