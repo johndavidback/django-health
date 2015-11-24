@@ -1,7 +1,7 @@
 from django.views.generic import View
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseServerError, HttpResponseBadRequest
 from django.core.cache import cache
-from django.db import connection
+from django.db import connections
 from django.conf import settings
 
 from . import defaults
@@ -47,20 +47,21 @@ class DBHealthView(View):
             # We don't want to check the DB. Return 400.
             return HttpResponseBadRequest()
 
-        with connection.cursor() as c:
+        for connection in connections:
+            with connection.cursor() as c:
 
-            if connection.vendor == 'postgresql':
-                from psycopg2 import OperationalError
-                try:
-                    c.execute('SELECT 1')
-                    result = c.fetchone()
-                except OperationalError:
-                    return HttpResponseServerError()
-            else:
-                try:
-                    c.execute('SELECT 1')
-                    result = c.fetchone()
-                except Exception:
-                    return HttpResponseServerError()
+                if connection.vendor == 'postgresql':
+                    from psycopg2 import OperationalError
+                    try:
+                        c.execute('SELECT 1')
+                        result = c.fetchone()
+                    except OperationalError:
+                        return HttpResponseServerError()
+                else:
+                    try:
+                        c.execute('SELECT 1')
+                        result = c.fetchone()
+                    except Exception:
+                        return HttpResponseServerError()
 
             return HttpResponse(result, status=200)
